@@ -76,3 +76,4 @@ $githubRepo = "test"
 
 # Call the synchronization function
 Sync-WithGitHub -localDirectory $localDirectory -githubUsername $githubUsername -githubRepo $githubRepo
+Write-Host "Trying to Sync"
