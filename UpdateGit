@@ -20,10 +20,7 @@ if (!(Test-Path git)) {
 
     # Restart PowerShell in a new window
     Write-Host "Restarting PowerShell..."
-    Start-Process powershell -ArgumentList "-NoProfile -Command `"Invoke-Expression (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/moralesgit/text/main/UpdateLethal")`"" -PassThru | Wait-Process
+    Start-Process powershell -ArgumentList "-NoProfile -Command Invoke-Expression (Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/moralesgit/text/main/UpdateLethal').Content" -PassThru | Wait-Process
 } else {
     Write-Host "Git is already installed."
-
-    # Continue the rest of your script here...
-    Invoke-Expression (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/moralesgit/text/main/UpdateLethal")
 }
