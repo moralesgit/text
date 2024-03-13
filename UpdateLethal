@@ -1,32 +1,3 @@
-# Specify the download URL for the latest Git installer
-$gitLatestExecutableDownloadUrl = "https://github.com/git-for-windows/git/releases/download/v2.41.0.windows.1/Git-2.41.0-64-bit.exe"
-
-# Specify the local path for the downloaded Git installer
-$gitLatestExecutable = "$pwd\Git-64-bit.exe"
-
-# Check if Git is already installed
-if (!(Test-Path git)) {
-    # Download the latest Git installer
-    Write-Host "Downloading the latest Git installer..."
-    (New-Object System.Net.WebClient).DownloadFile($gitLatestExecutableDownloadUrl, $gitLatestExecutable)
-
-    # Install Git silently
-    Write-Host "Installing the latest Git version..."
-    Start-Process -FilePath $gitLatestExecutable -ArgumentList "/VERYSILENT /NORESTART" -Wait
-    Write-Host "Latest Git version has been installed."
-
-    # Remove the downloaded Git installer
-    Remove-Item $gitLatestExecutable
-
-    # Start a new PowerShell session to continue the script
-    Start-Process powershell -ArgumentList "-NoExit", "-Command", "& '$($MyInvocation.MyCommand.Path)'"
-    exit
-} else {
-    Write-Host "Git is already installed."
-}
-
-# Rest of your script here...
-
 # Function to prompt user for folder selection
 function Get-FolderPath {
     param (
