@@ -1,3 +1,4 @@
+
 # Function to prompt user for folder selection
 function Get-FolderPath {
     param (
@@ -29,13 +30,13 @@ function Sync-WithGitHub {
 
     git remote rm origin
     # Set up the GitHub repository as the origin
-    git remote add origin https://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@github.com/$githubUsername/$githubRepo.git
+    git remote add origin "https://token:glpat-NgAyHJHehSz5hL4Gieez@gitlab.com/$githubUsername/$githubRepo.git"
 
     # Fetch changes from the remote repository
-    git fetch origin main
+    git fetch origin master
 
     # Get the hash of the latest commit in the branch
-    $commitHash = git rev-parse origin/main
+    $commitHash = git rev-parse origin/master
 
     # Reset the local repository to the latest commit
     git reset --hard $commitHash
@@ -45,13 +46,12 @@ function Sync-WithGitHub {
 
     Write-Host "Synchronization process completed."
 }
-
 # Prompt the user to choose the local directory for synchronization
 $localDirectory = Get-FolderPath -description "Select Lethal Company + Tamods for updates"
 
 # Specify GitHub repository details
-$githubUsername = "moralesgit"
-$githubRepo = "test"
+$githubUsername = "test6440111"
+$githubRepo = "lethalmain"
 
 # Call the synchronization function
 Sync-WithGitHub -localDirectory $localDirectory -githubUsername $githubUsername -githubRepo $githubRepo
