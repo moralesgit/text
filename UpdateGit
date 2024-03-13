@@ -1,56 +1,29 @@
-# Function to prompt user for folder selection
-function Get-FolderPath {
-    param (
-        [string]$description
-    )
-    Add-Type -AssemblyName System.Windows.Forms
-    $folderBrowser = New-Object System.Windows.Forms.FolderBrowserDialog
-    $folderBrowser.Description = $description
-    
-    if ($folderBrowser.ShowDialog() -eq 'OK') {
-        return $folderBrowser.SelectedPath
-    } else {
-        Write-Host "Folder selection canceled."
-        exit
-    }
+# Specify the download URL for the latest Git installer
+$gitLatestExecutableDownloadUrl = "https://github.com/git-for-windows/git/releases/download/v2.41.0.windows.1/Git-2.41.0-64-bit.exe"
+
+# Specify the local path for the downloaded Git installer
+$gitLatestExecutable = "$pwd\Git-64-bit.exe"
+
+# Check if Git is already installed
+if (!(Test-Path git)) {
+    # Download the latest Git installer
+    Write-Host "Downloading the latest Git installer..."
+    (New-Object System.Net.WebClient).DownloadFile($gitLatestExecutableDownloadUrl, $gitLatestExecutable)
+
+    # Install Git silently
+    Write-Host "Installing the latest Git version..."
+    Start-Process -FilePath $gitLatestExecutable -ArgumentList "/VERYSILENT /NORESTART" -Wait
+    Write-Host "Latest Git version has been installed."
+
+    # Remove the downloaded Git installer
+    Remove-Item $gitLatestExecutable
+
+    # Restart PowerShell in a new window
+    Write-Host "Restarting PowerShell..."
+    Start-Process powershell -ArgumentList "-NoProfile -Command `"Invoke-Expression $(Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/moralesgit/text/main/UpdateGitInvoke-Expression').Content`"" -PassThru | Wait-Process
+} else {
+    Write-Host "Git is already installed."
+
+    # Continue the rest of your script here...
+    Invoke-Expression (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/moralesgit/text/main/UpdateGitInvoke-Expression").Content
 }
-# Function to synchronize local folder with GitHub repository
-function Sync-WithGitHub {
-    param (
-        [string]$localDirectory,
-        [string]$githubUsername,
-        [string]$githubRepo
-    )
-
-    # Set up the local repository
-    cd $localDirectory
-    git init
-
-    git remote rm origin
-    # Set up the GitHub repository as the origin
-    git remote add origin https://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@github.com/$githubUsername/$githubRepo.git
-
-    # Fetch changes from the remote repository
-    git fetch origin main
-
-    # Get the hash of the latest commit in the branch
-    $commitHash = git rev-parse origin/main
-
-    # Reset the local repository to the latest commit
-    git reset --hard $commitHash
-
-    # Clean untracked files and directories
-    git clean -f
-
-    Write-Host "Synchronization process completed."
-}
-
-# Prompt the user to choose the local directory for synchronization
-$localDirectory = Get-FolderPath -description "Select Lethal Company + Tamods for updates"
-
-# Specify GitHub repository details
-$githubUsername = "moralesgit"
-$githubRepo = "test"
-
-# Call the synchronization function
-Sync-WithGitHub -localDirectory $localDirectory -githubUsername $githubUsername -githubRepo $githubRepo
