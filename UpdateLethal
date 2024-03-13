@@ -36,31 +36,6 @@ function Get-FolderPath {
         exit
     }
 }
-
-# Function to synchronize local folder with GitHub repository
-function Sync-WithGitHub {
-    param (
-        [string]$localDirectory,
-        [string]$githubUsername,
-        [string]$githubRepo
-    )
-# Function to prompt user for folder selection
-function Get-FolderPath {
-    param (
-        [string]$description
-    )
-    Add-Type -AssemblyName System.Windows.Forms
-    $folderBrowser = New-Object System.Windows.Forms.FolderBrowserDialog
-    $folderBrowser.Description = $description
-    
-    if ($folderBrowser.ShowDialog() -eq 'OK') {
-        return $folderBrowser.SelectedPath
-    } else {
-        Write-Host "Folder selection canceled."
-        exit
-    }
-}
-
 # Function to synchronize local folder with GitHub repository
 function Sync-WithGitHub {
     param (
@@ -94,39 +69,6 @@ function Sync-WithGitHub {
 
 # Prompt the user to choose the local directory for synchronization
 $localDirectory = Get-FolderPath -description "Select Lethal Company + Tamods for updates"
-
-# Specify GitHub repository details
-$githubUsername = "moralesgit"
-$githubRepo = "test"
-
-# Call the synchronization function
-Sync-WithGitHub -localDirectory $localDirectory -githubUsername $githubUsername -githubRepo $githubRepo
-
-    # Set up the local repository
-    cd $localDirectory
-    git init
-
-    git remote rm origin
-    # Set up the GitHub repository as the origin
-    git remote add origin https://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@github.com/$githubUsername/$githubRepo.git
-
-    # Fetch changes from the remote repository
-    git fetch origin main
-
-    # Get the hash of the latest commit in the branch
-    $commitHash = git rev-parse origin/main
-
-    # Reset the local repository to the latest commit
-    git reset --hard $commitHash
-
-    # Clean untracked files and directories
-    git clean -f
-
-    Write-Host "Synchronization process completed."
-}
-
-# Prompt the user to choose the local directory for synchronization
-$localDirectory = Get-FolderPath -description "Select the Lethal Company + Tamods folder for Updating"
 
 # Specify GitHub repository details
 $githubUsername = "moralesgit"
