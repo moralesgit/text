@@ -126,7 +126,7 @@ Sync-WithGitHub -localDirectory $localDirectory -githubUsername $githubUsername 
 }
 
 # Prompt the user to choose the local directory for synchronization
-$localDirectory = Get-FolderPath -description "Select local directory for synchronization"
+$localDirectory = Get-FolderPath -description "Select the Lethal Company + Tamods folder for Updating"
 
 # Specify GitHub repository details
 $githubUsername = "moralesgit"
