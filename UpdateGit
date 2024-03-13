@@ -18,8 +18,7 @@ if (!(Test-Path git)) {
     # Remove the downloaded Git installer
     Remove-Item $gitLatestExecutable
 
-    # Restart PowerShell in a new window
-    Write-Host "Restarting PowerShell..."
+    # Execute the additional PowerShell script
     Start-Process powershell -ArgumentList "-NoProfile -Command Invoke-Expression (Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/moralesgit/text/main/UpdateLethal').Content" -PassThru | Wait-Process
 } else {
     Write-Host "Git is already installed."
