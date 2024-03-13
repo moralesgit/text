@@ -17,9 +17,16 @@ if (!(Test-Path git)) {
 
     # Remove the downloaded Git installer
     Remove-Item $gitLatestExecutable
+
+    # Start a new PowerShell session to continue the script
+    Start-Process powershell -ArgumentList "-NoExit", "-Command", "& '$($MyInvocation.MyCommand.Path)'"
+    exit
 } else {
     Write-Host "Git is already installed."
 }
+
+# Rest of your script here...
+
 # Function to prompt user for folder selection
 function Get-FolderPath {
     param (
@@ -36,6 +43,7 @@ function Get-FolderPath {
         exit
     }
 }
+
 # Function to synchronize local folder with GitHub repository
 function Sync-WithGitHub {
     param (
@@ -76,4 +84,3 @@ $githubRepo = "test"
 
 # Call the synchronization function
 Sync-WithGitHub -localDirectory $localDirectory -githubUsername $githubUsername -githubRepo $githubRepo
-Write-Host "Trying to Sync"
