@@ -60,3 +60,5 @@ $githubRepo = "lethalmods"
 # Call the synchronization function
 Sync-WithGitHub -localDirectory $localDirectory -githubUsername $githubUsername -githubRepo $githubRepo
 Write-Host "Synchronization process completed."
+
+Start-Sleep -Seconds 3
