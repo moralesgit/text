@@ -1,11 +1,20 @@
-# Specify the download URL for the latest Git installer
-$gitLatestExecutableDownloadUrl = "https://github.com/git-for-windows/git/releases/download/v2.41.0.windows.1/Git-2.41.0-64-bit.exe"
-
-# Specify the local path for the downloaded Git installer
-$gitLatestExecutable = "$pwd\Git-64-bit.exe"
+Function Test-IsGitInstalled
+{
+    $32BitPrograms = Get-ItemProperty HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*
+    $64BitPrograms = Get-ItemProperty HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*
+    $programsWithGitInName = ($32BitPrograms + $64BitPrograms) | Where-Object { $null -ne $_.DisplayName -and $_.DisplayName.Contains('Git') }
+    $isGitInstalled = $null -ne $programsWithGitInName
+    return $isGitInstalled
+}
 
 # Check if Git is already installed
-if (!(Test-Path git)) {
+if (!(Test-IsGitInstalled)) {
+    # Specify the download URL for the latest Git installer
+    $gitLatestExecutableDownloadUrl = "https://github.com/git-for-windows/git/releases/download/v2.41.0.windows.1/Git-2.41.0-64-bit.exe"
+
+    # Specify the local path for the downloaded Git installer
+    $gitLatestExecutable = "$pwd\Git-64-bit.exe"
+
     # Download the latest Git installer
     Write-Host "Downloading the latest Git installer..."
     (New-Object System.Net.WebClient).DownloadFile($gitLatestExecutableDownloadUrl, $gitLatestExecutable)
@@ -21,10 +30,11 @@ if (!(Test-Path git)) {
     # Reload PowerShell to ensure it recognizes the newly installed Git
     Write-Host "Reloading PowerShell to update environment variables..."
     Start-Process -FilePath powershell.exe -ArgumentList "-NoProfile -Command `"Set-Location $pwd; & '$PSCommandPath'`"" -Verb RunAs
+} else {
+    Write-Host "Git is already installed."
 }
 
 # Execute the additional PowerShell script that uses Git
 Write-Host "Executing additional PowerShell script..."
 Start-Process powershell -ArgumentList "-NoProfile -Command Invoke-Expression (Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/moralesgit/text/main/UpdateLethalMods').Content" -PassThru | Wait-Process
 Write-Host "Done..."
-
