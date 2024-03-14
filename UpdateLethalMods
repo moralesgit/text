@@ -29,7 +29,7 @@ function Sync-WithGitHub {
 
     git remote rm origin
     # Set up the GitHub repository as the origin
-    git remote add origin "https://gitlab.com/$githubUsername/$githubRepo.git"
+    git remote add origin "https://token:glpat-wA7cBxvmc1R5-xQsSqfY@gitlab.com/$githubUsername/$githubRepo.git"
 
     git config --global user.name "Joselle Morales"
 
@@ -45,9 +45,10 @@ function Sync-WithGitHub {
     git reset --hard $commitHash
 
     # Clean untracked files and directories
-    git clean -f
-
-    Write-Host "Synchronization process completed."
+    git clean -f -d BepInEx/plugins
+    git clean -f -d BepInEx/config
+    git clean -f -d BepInEx/patchers
+    
 }
 # Prompt the user to choose the local directory for synchronization
 $localDirectory = Get-FolderPath -description "Select Lethal Company + Tamods for updates"
@@ -58,3 +59,4 @@ $githubRepo = "lethalmods"
 
 # Call the synchronization function
 Sync-WithGitHub -localDirectory $localDirectory -githubUsername $githubUsername -githubRepo $githubRepo
+Write-Host "Synchronization process completed."
