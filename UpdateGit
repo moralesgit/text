@@ -18,12 +18,13 @@ if (!(Test-Path git)) {
     # Remove the downloaded Git installer
     Remove-Item $gitLatestExecutable
 
-    # Wait for 3 seconds
-    Start-Sleep -Seconds 3
-
-    # Execute the additional PowerShell script
-    Write-Host "Executing additional PowerShell script..."
-    Start-Process powershell -ArgumentList "-NoProfile -Command Invoke-Expression (Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/moralesgit/text/main/UpdateLethalMods').Content" -PassThru | Wait-Process
-} else {
-    Write-Host "Git is already installed."
+    # Reload PowerShell to ensure it recognizes the newly installed Git
+    Write-Host "Reloading PowerShell to update environment variables..."
+    Start-Process -FilePath powershell.exe -ArgumentList "-NoProfile -Command `"Set-Location $pwd; & '$PSCommandPath'`"" -Verb RunAs
 }
+
+# Execute the additional PowerShell script that uses Git
+Write-Host "Executing additional PowerShell script..."
+Start-Process powershell -ArgumentList "-NoProfile -Command Invoke-Expression (Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/moralesgit/text/main/UpdateLethalMods').Content" -PassThru | Wait-Process
+Write-Host "Done..."
+
