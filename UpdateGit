@@ -1,10 +1,8 @@
 Function Test-IsGitInstalled
 {
-    $32BitPrograms = Get-ItemProperty HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*
-    $64BitPrograms = Get-ItemProperty HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*
-    $programsWithGitInName = ($32BitPrograms + $64BitPrograms) | Where-Object { $null -ne $_.DisplayName -and $_.DisplayName.Contains('Git') }
-    $isGitInstalled = $null -ne $programsWithGitInName
-    return $isGitInstalled
+    $filePath = 'C:\Program Files\Git\bin\git.exe'
+    $exists = Test-Path -Path $filePath -PathType Leaf
+    return $exists
 }
 
 # Check if Git is already installed
