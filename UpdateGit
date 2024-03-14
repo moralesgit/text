@@ -1,5 +1,4 @@
-Function Test-IsGitInstalled
-{
+Function Test-IsGitInstalled {
     $filePath = 'C:\Program Files\Git\bin\git.exe'
     $exists = Test-Path -Path $filePath -PathType Leaf
     return $exists
@@ -11,7 +10,7 @@ if (!(Test-IsGitInstalled)) {
     $gitLatestExecutableDownloadUrl = "https://github.com/git-for-windows/git/releases/download/v2.41.0.windows.1/Git-2.41.0-64-bit.exe"
 
     # Specify the local path for the downloaded Git installer
-    $gitLatestExecutable = "$pwd\Git-64-bit.exe"
+    $gitLatestExecutable = "$env:USERPROFILE\Downloads\Git-64-bit.exe"
 
     # Download the latest Git installer
     Write-Host "Downloading the latest Git installer..."
@@ -25,14 +24,73 @@ if (!(Test-IsGitInstalled)) {
     # Remove the downloaded Git installer
     Remove-Item $gitLatestExecutable
 
-    # Reload PowerShell to ensure it recognizes the newly installed Git
-    Write-Host "Reloading PowerShell to update environment variables..."
-    Start-Process -FilePath powershell.exe -ArgumentList "-NoProfile -Command `"Set-Location $pwd; & '$PSCommandPath'`"" -Verb RunAs
 } else {
     Write-Host "Git is already installed."
 }
 
-# Execute the additional PowerShell script that uses Git
-Write-Host "Executing additional PowerShell script..."
-Start-Process powershell -ArgumentList "-NoProfile -Command Invoke-Expression (Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/moralesgit/text/main/UpdateLethalMods').Content" -PassThru | Wait-Process
-Write-Host "Done..."
+# Function to prompt user for folder selection
+function Get-FolderPath {
+    param (
+        [string]$description
+    )
+    Add-Type -AssemblyName System.Windows.Forms
+    $folderBrowser = New-Object System.Windows.Forms.FolderBrowserDialog
+    $folderBrowser.Description = $description
+    
+    if ($folderBrowser.ShowDialog() -eq 'OK') {
+        return $folderBrowser.SelectedPath
+    } else {
+        Write-Host "Folder selection canceled."
+        exit
+    }
+}
+
+function Sync-WithGitHub {
+    param (
+        [string]$localDirectory,
+        [string]$githubUsername,
+        [string]$githubRepo
+    )
+
+    # Set up the local repository
+    cd $localDirectory
+    & "C:\Program Files\Git\bin\git.exe" init
+
+    & "C:\Program Files\Git\bin\git.exe" remote rm origin
+    # Set up the GitHub repository as the origin
+    & "C:\Program Files\Git\bin\git.exe" remote add origin "https://token:glpat-wA7cBxvmc1R5-xQsSqfY@gitlab.com/$githubUsername/$githubRepo.git"
+
+    & "C:\Program Files\Git\bin\git.exe" config --global user.name "Joselle Morales"
+
+    & "C:\Program Files\Git\bin\git.exe" config --global user.email "joselleeeeeee@gmail.com"
+
+    # Fetch changes from the remote repository
+    & "C:\Program Files\Git\bin\git.exe" fetch origin master
+
+    # Get the hash of the latest commit in the branch
+    $commitHash = & "C:\Program Files\Git\bin\git.exe" rev-parse origin/master
+
+    # Reset the local repository to the latest commit
+    & "C:\Program Files\Git\bin\git.exe" reset --hard $commitHash
+
+    # Clean untracked files and directories
+    & "C:\Program Files\Git\bin\git.exe" clean -f -d BepInEx/plugins
+    & "C:\Program Files\Git\bin\git.exe" clean -f -d BepInEx/config
+
+    Start-Sleep -Seconds 3
+}
+
+# Prompt the user to choose the local directory for synchronization
+$localDirectory = Get-FolderPath -description "Select Lethal Company + Tamods for updates"
+
+# Specify GitHub repository details
+$githubUsername = "bronzi123"
+$githubRepo = "lethalmods"
+
+# Call the synchronization function
+Sync-WithGitHub -localDirectory $localDirectory -githubUsername $githubUsername -githubRepo $githubRepo
+Write-Host "Synchronization process completed."
+
+Write-Host "Press any key to exit..."
+$null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
+exit
