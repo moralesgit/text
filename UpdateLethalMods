@@ -25,28 +25,28 @@ function Sync-WithGitHub {
 
     # Set up the local repository
     cd $localDirectory
-    git init
+    C:\"Program Files"\Git\bin\git.exe init
 
     git remote rm origin
     # Set up the GitHub repository as the origin
-    git remote add origin "https://token:glpat-wA7cBxvmc1R5-xQsSqfY@gitlab.com/$githubUsername/$githubRepo.git"
+    C:\"Program Files"\Git\bin\git.exe remote add origin "https://token:glpat-wA7cBxvmc1R5-xQsSqfY@gitlab.com/$githubUsername/$githubRepo.git"
 
-    git config --global user.name "Joselle Morales"
+    C:\"Program Files"\Git\bin\git.exe config --global user.name "Joselle Morales"
 
-    git config --global user.email "joselleeeeeee@gmail.com"
+    C:\"Program Files"\Git\bin\git.exe config --global user.email "joselleeeeeee@gmail.com"
 
     # Fetch changes from the remote repository
-    git fetch origin master
+    C:\"Program Files"\Git\bin\git.exe fetch origin master
 
     # Get the hash of the latest commit in the branch
     $commitHash = git rev-parse origin/master
 
     # Reset the local repository to the latest commit
-    git reset --hard $commitHash
+    C:\"Program Files"\Git\bin\git.exe reset --hard $commitHash
 
     # Clean untracked files and directories
-    git clean -f -d BepInEx/plugins
-    git clean -f -d BepInEx/config
+    C:\"Program Files"\Git\bin\git.exe clean -f -d BepInEx/plugins
+    C:\"Program Files"\Git\bin\git.exe clean -f -d BepInEx/config
 
     Start-Sleep -Seconds 3
 
