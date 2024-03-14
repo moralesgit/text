@@ -47,7 +47,6 @@ function Sync-WithGitHub {
     # Clean untracked files and directories
     git clean -f -d BepInEx/plugins
     git clean -f -d BepInEx/config
-    git clean -f -d BepInEx/patchers
 
     Start-Sleep -Seconds 3
 
