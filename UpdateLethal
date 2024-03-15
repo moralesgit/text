@@ -4,7 +4,7 @@ git gc --aggressive --prune=all
 
 git push origin --force --all
 
-rmdir /s /q .git
+rmdir /s /q .git or Remove-Item -Path $gitDirectoryPath -Recurse -Force
 
 
 function Get-DirectorySize {
