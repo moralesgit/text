@@ -54,6 +54,23 @@ function Sync-WithGitHub {
 
     # Set up the local repository
     cd $localDirectory
+    
+    # Specify the threshold for .git directory size in GB
+    $thresholdSizeGB = 3
+
+    # Specify the path to the .git directory
+    $gitDirectoryPath = "$localDirectory/.git"
+
+    # Check if the .git directory size exceeds the threshold
+    $gitDirectorySize = Get-DirectorySize -Path $gitDirectoryPath
+
+    if ($gitDirectorySize -gt $thresholdSizeGB) {
+        Remove-Item -Path $gitDirectoryPath -Recurse -Force
+    }
+    else {
+        Write-Host ".git directory size is below the threshold. No action needed."
+    }
+
     & "C:\Program Files\Git\bin\git.exe" init
 
     & "C:\Program Files\Git\bin\git.exe" remote rm origin
@@ -65,7 +82,8 @@ function Sync-WithGitHub {
     & "C:\Program Files\Git\bin\git.exe" config --global user.email "joselleeeeeee@gmail.com"
 
     Write-Host "Fetching changes from the remote repository..."
-    $fetchOutput = & "C:\Program Files\Git\bin\git.exe" fetch origin master 
+    & "C:\Program Files\Git\bin\git.exe" clean -f -d .gitattributes
+    $fetchOutput = & "C:\Program Files\Git\bin\git.exe" pull origin master 
     
     # Get the hash of the latest commit in the branch
     & "C:\Program Files\Git\bin\git.exe" rev-parse origin/master
@@ -75,8 +93,17 @@ function Sync-WithGitHub {
     # Clean untracked files and directories
     & "C:\Program Files\Git\bin\git.exe" clean -f -d BepInEx/plugins
     & "C:\Program Files\Git\bin\git.exe" clean -f -d BepInEx/config
+    & "C:\Program Files\Git\bin\git.exe" clean -f -d .gitattributes
 
     Start-Sleep -Seconds 3
+}
+function Get-DirectorySize {
+    param (
+        [string]$Path
+    )
+    $directory = Get-ChildItem $Path -Recurse -File
+    $totalSize = ($directory | Measure-Object -Property Length -Sum).Sum / 1GB
+    return $totalSize
 }
 
 # Prompt the user to choose the local directory for synchronization
