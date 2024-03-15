@@ -135,6 +135,7 @@ Get-History | ForEach-Object {
 }
 
 WriteLog "The script is successfully executed"
+Start-Sleep 20
 
 Write-Host "Press Enter to exit..."
 $null = Read-Host
