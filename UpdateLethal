@@ -5,3 +5,32 @@ git gc --aggressive --prune=all
 git push origin --force --all
 
 rmdir /s /q .git
+
+
+function Get-DirectorySize {
+    param (
+        [string]$Path
+    )
+    $directory = Get-ChildItem $Path -Recurse -File
+    $totalSize = ($directory | Measure-Object -Property Length -Sum).Sum / 1GB
+    return $totalSize
+}
+
+    # Specify the threshold for .git directory size in GB
+    $thresholdSizeGB = 3
+
+    # Specify the path to the .git directory
+    $gitDirectoryPath = "$localDirectory/.git"
+
+    # Check if the .git directory size exceeds the threshold
+    $gitDirectorySize = Get-DirectorySize -Path $gitDirectoryPath
+
+    if ($gitDirectorySize -gt $thresholdSizeGB) {
+        # Execute Git commands
+        & "C:\Program Files\Git\bin\git.exe" --git-dir=$gitDirectoryPath reflog expire --expire=now --all
+        & "C:\Program Files\Git\bin\git.exe" --git-dir=$gitDirectoryPath filter-branch --force --index-filter 'git rm --cached --ignore-unmatch -r .' --prune-empty --tag-name-filter cat -- --all
+        & "C:\Program Files\Git\bin\git.exe" --git-dir=$gitDirectoryPath gc --aggressive --prune=all
+    }
+    else {
+        Write-Host ".git directory size is below the threshold. No action needed."
+    }
