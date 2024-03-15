@@ -82,6 +82,9 @@ function Sync-WithGitHub {
     & "C:\Program Files\Git\bin\git.exe" config --global user.email "joselleeeeeee@gmail.com"
 
     Write-Host "Fetching changes from the remote repository..."
+    & "C:\Program Files\Git\bin\git.exe" clean -f -d BepInEx/plugins
+    & "C:\Program Files\Git\bin\git.exe" clean -f -d BepInEx/config
+    & "C:\Program Files\Git\bin\git.exe" clean -f -d BepInEx/core
     & "C:\Program Files\Git\bin\git.exe" clean -f -d .gitattributes
     $fetchOutput = & "C:\Program Files\Git\bin\git.exe" pull origin master 
     
@@ -91,9 +94,7 @@ function Sync-WithGitHub {
     & "C:\Program Files\Git\bin\git.exe" reset --hard
 
     # Clean untracked files and directories
-    & "C:\Program Files\Git\bin\git.exe" clean -f -d BepInEx/plugins
-    & "C:\Program Files\Git\bin\git.exe" clean -f -d BepInEx/config
-    & "C:\Program Files\Git\bin\git.exe" clean -f -d .gitattributes
+
 
     Start-Sleep -Seconds 3
 }
@@ -117,6 +118,21 @@ $githubRepo = "lethalmods"
 Sync-WithGitHub -localDirectory $localDirectory -githubUsername $githubUsername -githubRepo $githubRepo
 Write-Host "Synchronization process completed."
 
-Write-Host "Press Enter to exit..."
+$Logfile = "$localDirectory/user.log"
+
+function WriteLog {
+    param (
+        [string]$LogString
+    )
+    $Stamp = (Get-Date).ToString("yyyy/MM/dd HH:mm:ss")
+    $LogMessage = "$Stamp $LogString"
+    Add-Content -Path $LogFile -Value $LogMessage
+}
+
+# Save the entire command history
+Get-History | ForEach-Object {
+    WriteLog "Command $_.Id: $_.CommandLine"
+}
+
 $null = Read-Host
 exit
