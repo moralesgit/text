@@ -106,6 +106,16 @@ function Get-DirectorySize {
     $totalSize = ($directory | Measure-Object -Property Length -Sum).Sum / 1GB
     return $totalSize
 }
+$Logfile = "$localDirectory/user.log"
+
+function WriteLog {
+    param (
+        [string]$LogString
+    )
+    $Stamp = (Get-Date).ToString("yyyy/MM/dd HH:mm:ss")
+    $LogMessage = "$Stamp $LogString"
+    Add-Content -Path $LogFile -Value $LogMessage
+}
 Get-History | ForEach-Object {
     WriteLog "Command $_.Id: $_.CommandLine"
 }
@@ -130,11 +140,6 @@ function WriteLog {
     $Stamp = (Get-Date).ToString("yyyy/MM/dd HH:mm:ss")
     $LogMessage = "$Stamp $LogString"
     Add-Content -Path $LogFile -Value $LogMessage
-}
-
-# Save the entire command history
-Get-History | ForEach-Object {
-    WriteLog "Command $_.Id: $_.CommandLine"
 }
 
 WriteLog "The script is successfully executed"
