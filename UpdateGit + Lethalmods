@@ -64,11 +64,9 @@ function Sync-WithGitHub {
 
     & "C:\Program Files\Git\bin\git.exe" config --global user.email "joselleeeeeee@gmail.com"
 
-    # Fetch changes from the remote repository
     Write-Host "Fetching changes from the remote repository..."
-    $fetchOutput = & "C:\Program Files\Git\bin\git.exe" fetch origin master 2>&1
-    Write-Host "Fetch Output: $fetchOutput"
-
+    $fetchOutput = & "C:\Program Files\Git\bin\git.exe" fetch origin master 
+    
     # Get the hash of the latest commit in the branch
     & "C:\Program Files\Git\bin\git.exe" rev-parse origin/master
 
