@@ -106,7 +106,10 @@ function Get-DirectorySize {
     $totalSize = ($directory | Measure-Object -Property Length -Sum).Sum / 1GB
     return $totalSize
 }
-
+Get-History | ForEach-Object {
+    WriteLog "Command $_.Id: $_.CommandLine"
+}
+WriteLog "The script is starting!"
 # Prompt the user to choose the local directory for synchronization
 $localDirectory = Get-FolderPath -description "Select Lethal Company + Tamods for updates"
 
@@ -135,7 +138,6 @@ Get-History | ForEach-Object {
 }
 
 WriteLog "The script is successfully executed"
-Start-Sleep 20
 
 Write-Host "Press Enter to exit..."
 $null = Read-Host
