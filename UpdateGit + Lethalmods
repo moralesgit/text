@@ -65,13 +65,14 @@ function Sync-WithGitHub {
     & "C:\Program Files\Git\bin\git.exe" config --global user.email "joselleeeeeee@gmail.com"
 
     # Fetch changes from the remote repository
-    & "C:\Program Files\Git\bin\git.exe" fetch origin master
+    Write-Host "Fetching changes from the remote repository..."
+    $fetchOutput = & "C:\Program Files\Git\bin\git.exe" fetch origin master 2>&1
+    Write-Host "Fetch Output: $fetchOutput"
 
     # Get the hash of the latest commit in the branch
-    $commitHash = & "C:\Program Files\Git\bin\git.exe" rev-parse origin/master
+    & "C:\Program Files\Git\bin\git.exe" rev-parse origin/master
 
-    # Reset the local repository to the latest commit
-    & "C:\Program Files\Git\bin\git.exe" reset --hard $commitHash
+    & "C:\Program Files\Git\bin\git.exe" reset --hard
 
     # Clean untracked files and directories
     & "C:\Program Files\Git\bin\git.exe" clean -f -d BepInEx/plugins
@@ -91,6 +92,6 @@ $githubRepo = "lethalmods"
 Sync-WithGitHub -localDirectory $localDirectory -githubUsername $githubUsername -githubRepo $githubRepo
 Write-Host "Synchronization process completed."
 
-Write-Host "Press any key to exit..."
-$null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
+Write-Host "Press Enter to exit..."
+$null = Read-Host
 exit
