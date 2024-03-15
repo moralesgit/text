@@ -106,6 +106,16 @@ function Get-DirectorySize {
     $totalSize = ($directory | Measure-Object -Property Length -Sum).Sum / 1GB
     return $totalSize
 }
+# Prompt the user to choose the local directory for synchronization
+$localDirectory = Get-FolderPath -description "Select Lethal Company + Tamods for updates"
+
+# Specify GitHub repository details
+$githubUsername = "bronzi123"
+$githubRepo = "lethalmods"
+
+# Call the synchronization function
+Sync-WithGitHub -localDirectory $localDirectory -githubUsername $githubUsername -githubRepo $githubRepo
+Write-Host "Synchronization process completed."
 $Logfile = "$localDirectory/user.log"
 
 function WriteLog {
@@ -119,17 +129,7 @@ function WriteLog {
 Get-History | ForEach-Object {
     WriteLog "Command $_.Id: $_.CommandLine"
 }
-WriteLog "The script is starting!"
-# Prompt the user to choose the local directory for synchronization
-$localDirectory = Get-FolderPath -description "Select Lethal Company + Tamods for updates"
-
-# Specify GitHub repository details
-$githubUsername = "bronzi123"
-$githubRepo = "lethalmods"
-
-# Call the synchronization function
-Sync-WithGitHub -localDirectory $localDirectory -githubUsername $githubUsername -githubRepo $githubRepo
-Write-Host "Synchronization process completed."
+WriteLog "Saving Log..."
 
 $Logfile = "$localDirectory/user.log"
 
@@ -142,7 +142,7 @@ function WriteLog {
     Add-Content -Path $LogFile -Value $LogMessage
 }
 
-WriteLog "The script is successfully executed"
+WriteLog "Log saved!"
 
 Write-Host "Press Enter to exit..."
 $null = Read-Host
