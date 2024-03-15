@@ -134,5 +134,8 @@ Get-History | ForEach-Object {
     WriteLog "Command $_.Id: $_.CommandLine"
 }
 
+WriteLog "The script is successfully executed"
+
+Write-Host "Press Enter to exit..."
 $null = Read-Host
 exit
