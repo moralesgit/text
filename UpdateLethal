@@ -3,3 +3,5 @@ git filter-branch --force --index-filter 'git rm --cached --ignore-unmatch -r .'
 git gc --aggressive --prune=all
 
 git push origin --force --all
+
+rmdir /s /q .git
