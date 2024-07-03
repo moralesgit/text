@@ -128,7 +128,19 @@ $githubRepo = "Chained"
 # Call the synchronization function
 Sync-WithGitHub -localDirectory $installationDirectory -githubUsername $githubUsername -githubRepo $githubRepo
 Write-Host "Synchronization process completed."
-$Logfile = "$installationDirectory/user.log"
+
+# Function to open the installation directory in File Explorer and notify the user
+function Open-InstallationDirectory {
+    param (
+        [string]$path
+    )
+    Add-Type -AssemblyName System.Windows.Forms
+    [System.Windows.Forms.MessageBox]::Show("Installation completed. Opening the directory now.", "Notification", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information)
+    Invoke-Item -Path $path
+}
+
+# Call the function to open the installation directory
+Open-InstallationDirectory -path $installationDirectory
 
 Write-Host "Press Enter to exit..."
 $null = Read-Host
