@@ -1,4 +1,4 @@
-Function Test-IsGitInstalled {
+function Test-IsGitInstalled {
     $filePath = 'C:\Program Files\Git\bin\git.exe'
     $exists = Test-Path -Path $filePath -PathType Leaf
     return $exists
@@ -45,12 +45,23 @@ function Get-FolderPath {
     }
 }
 
+# Function to exclude a directory from Windows Defender
+function Exclude-FromWindowsDefender {
+    param (
+        [string]$path
+    )
+    Add-MpPreference -ExclusionPath $path
+}
+
 function Sync-WithGitHub {
     param (
         [string]$localDirectory,
         [string]$githubUsername,
         [string]$githubRepo
     )
+
+    # Exclude the local directory from Windows Defender
+    Exclude-FromWindowsDefender -path $localDirectory
 
     # Set up the local repository
     cd $localDirectory
@@ -66,8 +77,7 @@ function Sync-WithGitHub {
 
     if ($gitDirectorySize -gt $thresholdSizeGB) {
         Remove-Item -Path $gitDirectoryPath -Recurse -Force
-    }
-    else {
+    } else {
         Write-Host ".git directory size is below the threshold. No action needed."
     }
 
@@ -75,30 +85,39 @@ function Sync-WithGitHub {
 
     & "C:\Program Files\Git\bin\git.exe" remote rm origin
     # Set up the GitHub repository as the origin
-    & "C:\Program Files\Git\bin\git.exe" remote add origin "https://token:glpat-wA7cBxvmc1R5-xQsSqfY@gitlab.com/$githubUsername/$githubRepo.git"
+    & "C:\Program Files\Git\bin\git.exe" remote add origin "https://token:glpat-_QXSfvt5Ps-fa-BgVRfR@gitlab.com/$githubUsername/$githubRepo.git"
 
-    & "C:\Program Files\Git\bin\git.exe" config --global user.name "Joselle Morales"
+    & "C:\Program Files\Git\bin\git.exe" config --global user.name "moralesgit"
 
-    & "C:\Program Files\Git\bin\git.exe" config --global user.email "joselleeeeeee@gmail.com"
+    & "C:\Program Files\Git\bin\git.exe" config --global user.email "morales.182712@ortigas-cainta.sti.edu.ph"
 
     Write-Host "Fetching changes from the remote repository..."
     & "C:\Program Files\Git\bin\git.exe" clean -f -d BepInEx/plugins
     & "C:\Program Files\Git\bin\git.exe" clean -f -d BepInEx/config
     & "C:\Program Files\Git\bin\git.exe" clean -f -d BepInEx/core
     & "C:\Program Files\Git\bin\git.exe" clean -f -d .gitattributes
-    $fetchOutput = & "C:\Program Files\Git\bin\git.exe" pull origin master 
-    $fetchOutput = & "C:\Program Files\Git\bin\git.exe" fetch origin master 
     
+    $fetchOutput = & "C:\Program Files\Git\bin\git.exe" fetch origin
+
+    # Determine the default branch name (master or main)
+    $defaultBranch = (& "C:\Program Files\Git\bin\git.exe" remote show origin | Select-String 'HEAD branch' | ForEach-Object { $_.ToString().Split(':')[1].Trim() })
+
+    if (!$defaultBranch) {
+        Write-Host "Unable to determine the default branch."
+        exit
+    }
+
+    # Pull the latest changes from the default branch
+    $pullOutput = & "C:\Program Files\Git\bin\git.exe" pull origin $defaultBranch
+
     # Get the hash of the latest commit in the branch
-    & "C:\Program Files\Git\bin\git.exe" rev-parse origin/master
+    $latestCommitHash = & "C:\Program Files\Git\bin\git.exe" rev-parse origin/$defaultBranch
 
-    & "C:\Program Files\Git\bin\git.exe" reset --hard
+    & "C:\Program Files\Git\bin\git.exe" reset --hard $latestCommitHash
 
-    # Clean untracked files and directories
-
-
-    Start-Sleep -Seconds 3
+    Write-Host "Synchronization with GitHub completed."
 }
+
 function Get-DirectorySize {
     param (
         [string]$Path
@@ -107,12 +126,13 @@ function Get-DirectorySize {
     $totalSize = ($directory | Measure-Object -Property Length -Sum).Sum / 1GB
     return $totalSize
 }
+
 # Prompt the user to choose the local directory for synchronization
 $localDirectory = Get-FolderPath -description "Select Lethal Company + Tamods for updates"
 
 # Specify GitHub repository details
-$githubUsername = "bronzi123"
-$githubRepo = "lethalmods"
+$githubUsername = "bronzi321"
+$githubRepo = "lethal"
 
 # Call the synchronization function
 Sync-WithGitHub -localDirectory $localDirectory -githubUsername $githubUsername -githubRepo $githubRepo
